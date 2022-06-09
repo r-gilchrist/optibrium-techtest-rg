@@ -23,6 +23,9 @@ class httpResponse:
     # Duplicate names
     DUPLICATE = 409
 
+    # Id not found
+    ID_NOT_FOUND = 404
+
 
 def not_authorised(headers):
     '''Returns True if no x-api-token has been provided'''
@@ -72,7 +75,7 @@ def delete_person(id):
 
     # Check if id exists
     if id not in database.get_ids():
-        return {"error": "Not Found"}, 404
+        return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND
 
     return {}, httpResponse.OK_DELETE
 
