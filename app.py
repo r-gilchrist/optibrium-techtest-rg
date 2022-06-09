@@ -29,6 +29,9 @@ class httpResponse:
     # Inactive database
     INACTIVE_DB = 500
 
+    # No name in json
+    NO_NAME = 410
+
 
 def not_authorised(headers):
     '''Returns True if no x-api-token has been provided'''
@@ -57,8 +60,13 @@ def post_person():
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
 
+    # Check if user has specified name in json
+    content = request.get_json()
+    if "name" not in content.keys():
+        return {"error": "'name' is not specified"}, httpResponse.NO_NAME
+
     # Get name
-    name = request.get_json()["name"]
+    name = content["name"]
 
     # Check if name already exists
     if name in database.get_names():
