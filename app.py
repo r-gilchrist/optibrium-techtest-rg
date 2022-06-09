@@ -26,6 +26,9 @@ class httpResponse:
     # Id not found
     ID_NOT_FOUND = 404
 
+    # Inactive database
+    INACTIVE_DB = 500
+
 
 def not_authorised(headers):
     '''Returns True if no x-api-token has been provided'''
@@ -90,7 +93,7 @@ def get_status():
 
     # Check if database is offline
     if database.get_db_status() is False:
-        return {"error": "Database is not active"}, 500
+        return {"error": "Database is not active"}, httpResponse.INACTIVE_DB
     return {"msg": "OK"}, httpResponse.OK_STATUS
 
 
