@@ -41,6 +41,9 @@ def not_authorised(headers):
 @app.route("/person", methods=["GET"])
 def get_people():
 
+    # Reinforce table creation
+    database.ensure_tables_are_created()
+
     # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Authorization required"}, httpResponse.NO_TOKEN
@@ -55,6 +58,9 @@ def get_people():
 
 @app.route("/person", methods=["POST"])
 def post_person():
+
+    # Reinforce table creation
+    database.ensure_tables_are_created()
 
     # Check authorisation
     if not_authorised(request.headers):
@@ -84,6 +90,9 @@ def post_person():
 
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
+
+    # Reinforce table creation
+    database.ensure_tables_are_created()
 
     # Check authorisation
     if not_authorised(request.headers):
