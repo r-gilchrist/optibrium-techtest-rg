@@ -19,30 +19,44 @@ class httpResponse:
 
 
 def not_authorised(headers):
+    '''Returns True if no x-api-token has been provided'''
     return headers.get("x-api-key") is None
 
 
 @app.route("/person", methods=["GET"])
 def get_people():
+
+    # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Authorization required"}, httpResponse.NO_TOKEN
+
     return {}, httpResponse.OK_GET
 
 
 @app.route("/person", methods=["POST"])
 def post_person():
+
+    # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
+
+    # User data
     data = request.get_json()
+
+    # Check user data is alphanumeric
     if not data["name"].isalpha():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
+
     return {}, httpResponse.OK_POST
 
 
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
+
+    # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
+
     return {}, httpResponse.OK_DELETE
 
 
