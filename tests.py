@@ -84,6 +84,11 @@ class PostPersonTests(unittest.TestCase):
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json(), {"error": "Name exists"})
 
+    def test_badjson(self):
+        response = requests.post(BASE_URL + "person", headers=HEADER, json={"bad_param": "Ryan"})
+        self.assertEqual(response.status_code, 410)
+        self.assertEqual(response.json(), {"error": "'name' is not specified"})
+
 
 class DeletePersonTests(unittest.TestCase):
 
