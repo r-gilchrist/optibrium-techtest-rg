@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 FILENAME = "database.db"
 
@@ -59,5 +60,5 @@ def delete_person(id):
 
 
 def get_db_status():
-    # It's always running perfectly :)
-    return True
+    # It's always running perfectly, as long as it exists of course! :)
+    return os.path.exists(FILENAME)
