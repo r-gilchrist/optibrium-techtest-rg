@@ -70,6 +70,10 @@ def delete_person(id):
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
 
+    # Check if id exists
+    if id not in database.get_ids():
+        return {"error": "Not Found"}, 404
+
     return {}, httpResponse.OK_DELETE
 
 
