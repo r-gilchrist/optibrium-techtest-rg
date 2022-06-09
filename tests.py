@@ -90,6 +90,9 @@ class DeletePersonTests(unittest.TestCase):
 
 class GetStatusTests(unittest.TestCase):
 
+    def setUp(self):
+        ensure_tables_are_created()
+
     def test_success(self):
         response = requests.get(BASE_URL + "status")
         self.assertEqual(response.status_code, 200)
