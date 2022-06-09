@@ -43,17 +43,17 @@ def post_person():
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
 
-    # Get user data
-    data = request.get_json()
+    # Get name
+    name = request.get_json()["name"]
 
     # Check user data is alphanumeric
-    if not data["name"].isalpha():
+    if not name.isalpha():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
 
     # Add person to database.db
-    id = database.add_person(data["name"])
+    id = database.add_person(name)
 
-    return {"id": id, "name": data["name"]}, httpResponse.OK_POST
+    return {"id": id, "name": name}, httpResponse.OK_POST
 
 
 @app.route("/person/<int:id>", methods=["DELETE"])
