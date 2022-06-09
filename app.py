@@ -1,4 +1,7 @@
 from flask import Flask, request
+import database
+
+database.ensure_tables_are_created()
 
 app = Flask(__name__)
 
@@ -40,14 +43,17 @@ def post_person():
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
 
-    # User data
+    # Get user data
     data = request.get_json()
 
     # Check user data is alphanumeric
     if not data["name"].isalpha():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
 
-    return {}, httpResponse.OK_POST
+    # Add person to database.db
+    id = database.add_person(data["name"])
+
+    return {"id": id, "name": data["name"]}, httpResponse.OK_POST
 
 
 @app.route("/person/<int:id>", methods=["DELETE"])
