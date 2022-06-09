@@ -51,6 +51,13 @@ class PostPersonTests(unittest.TestCase):
 
 class DeletePersonTests(unittest.TestCase):
 
+    def setUp(self):
+        '''Reset the table for each test'''
+        if os.path.exists(db := "database.db"):
+            os.remove(db)
+        ensure_tables_are_created()
+        requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
+
     def test_success(self):
         response = requests.delete(BASE_URL + "person/1", headers=HEADER)
         self.assertEqual(response.status_code, 204)
@@ -59,6 +66,11 @@ class DeletePersonTests(unittest.TestCase):
         response = requests.delete(BASE_URL + "person/1")
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
+
+    def test_notfound(self):
+        response = requests.delete(BASE_URL + "person/100", headers=HEADER)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"error": "Not Found"})
 
 
 class GetStatusTests(unittest.TestCase):
