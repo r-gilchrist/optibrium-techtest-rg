@@ -74,7 +74,7 @@ class PostPersonTests(unittest.TestCase):
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
     def test_alphanumeric(self):
-        response = post("Ryan!!!")
+        response = post(name="Ryan!!!")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
