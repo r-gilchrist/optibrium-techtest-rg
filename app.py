@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -14,16 +14,22 @@ class httpResponse:
 
 @app.route("/person", methods=["GET"])
 def get_people():
+    if request.headers.get("x-api-key") is None:
+        return {}, 401
     return {}, httpResponse.OK_GET
 
 
 @app.route("/person", methods=["POST"])
 def post_person():
+    if request.headers.get("x-api-key") is None:
+        return {}, 401
     return {}, httpResponse.OK_POST
 
 
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
+    if request.headers.get("x-api-key") is None:
+        return {}, 401
     return {}, httpResponse.OK_DELETE
 
 
