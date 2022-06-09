@@ -1,7 +1,7 @@
 import unittest
 import requests
 import os
-from database import ensure_tables_are_created
+from database import ensure_tables_are_created, FILENAME
 
 BASE_URL = "http://127.0.0.1:5000/"
 HEADER = {"x-api-key": "skeleton-key"}
@@ -28,13 +28,17 @@ def delete(id=1, authenticate=True):
     return response
 
 
+def delete_database():
+    '''Deletes the SQL database'''
+    if os.path.exists(FILENAME):
+        os.remove(FILENAME)
+
+
 class GetPeopleTests(unittest.TestCase):
     '''Tests for expected GET functionality'''
 
     def setUp(self):
-        '''Reset the table for each test'''
-        if os.path.exists(db := "database.db"):
-            os.remove(db)
+        delete_database()
         ensure_tables_are_created()
 
     def test_success_one(self):
@@ -60,9 +64,7 @@ class PostPersonTests(unittest.TestCase):
     '''Tests for expected POST functionality'''
 
     def setUp(self):
-        '''Reset the table for each test'''
-        if os.path.exists(db := "database.db"):
-            os.remove(db)
+        delete_database()
         ensure_tables_are_created()
 
     def test_success(self):
@@ -96,9 +98,7 @@ class DeletePersonTests(unittest.TestCase):
     '''Tests for expected DELETE functionality'''
 
     def setUp(self):
-        '''Reset the table for each test'''
-        if os.path.exists(db := "database.db"):
-            os.remove(db)
+        delete_database()
         ensure_tables_are_created()
         post()
 
@@ -121,7 +121,6 @@ class GetStatusTests(unittest.TestCase):
     '''Tests for expected status endpoint functionality'''
 
     def setUp(self):
-        '''Ensures database always exists at start of each test'''
         ensure_tables_are_created()
 
     def test_success(self):
@@ -130,7 +129,7 @@ class GetStatusTests(unittest.TestCase):
         self.assertEqual(response.json(), {"msg": "OK"})
 
     def test_offline(self):
-        os.remove("database.db")
+        delete_database()
         response = get(endpoint='status', authenticate=False)  # No authentication required
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"error": "Database is not active"})
@@ -140,9 +139,7 @@ class DeleteDatabaseTests(unittest.TestCase):
     '''Tests for expected functionality when database is deleted from disk'''
 
     def setUp(self):
-        '''Deletes database but does not recreate it'''
-        if os.path.exists(db := "database.db"):
-            os.remove(db)
+        delete_database()
 
     def test_get(self):
         response = get()

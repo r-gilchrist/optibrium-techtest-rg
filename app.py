@@ -82,7 +82,7 @@ def post_person():
     if not name.isalpha():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
 
-    # Add person to database.db
+    # Add person to database
     id = database.add_person(name)
 
     return {"id": id, "name": name}, httpResponse.OK_POST
