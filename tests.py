@@ -44,10 +44,9 @@ class PostPersonTests(unittest.TestCase):
 
     def test_duplicate(self):
         for n in range(2):
-            response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan!"})
+            response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json(), {"error": "Name exists"})
-
 
 
 class DeletePersonTests(unittest.TestCase):
