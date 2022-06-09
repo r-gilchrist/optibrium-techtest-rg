@@ -14,6 +14,7 @@ class GetPeopleTests(unittest.TestCase):
     def test_notoken(self):
         response = requests.get(BASE_URL + "person")
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"error": "Authorization required"})
 
 
 class PostPersonTests(unittest.TestCase):
@@ -25,6 +26,7 @@ class PostPersonTests(unittest.TestCase):
     def test_notoken(self):
         response = requests.post(BASE_URL + "person", json={"name": "Ryan"})
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"error": "Unauthorised"})
 
 
 class DeletePersonTests(unittest.TestCase):
@@ -36,6 +38,7 @@ class DeletePersonTests(unittest.TestCase):
     def test_notoken(self):
         response = requests.delete(BASE_URL + "person/1")
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"error": "Unauthorised"})
 
 
 class GetStatusTests(unittest.TestCase):
