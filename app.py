@@ -46,6 +46,13 @@ def post_person():
     # Get name
     name = request.get_json()["name"]
 
+    # Get existing names
+    existing_data = database.get_people()
+    if len(existing_data) > 0:
+        _, names = zip(*existing_data)
+        if name in names:
+            return {"error": "Name exists"}, 409
+
     # Check user data is alphanumeric
     if not name.isalpha():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
