@@ -93,3 +93,10 @@ class GetStatusTests(unittest.TestCase):
     def test_success(self):
         response = requests.get(BASE_URL + "status")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"msg": "OK"})
+
+    def test_offline(self):
+        os.remove("database.db")
+        response = requests.get(BASE_URL + "status")
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"error": "Database is not active"})
