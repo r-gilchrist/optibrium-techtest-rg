@@ -22,21 +22,21 @@ def not_authorised(headers):
 @app.route("/person", methods=["GET"])
 def get_people():
     if not_authorised(request.headers):
-        return {}, httpResponse.NO_TOKEN
+        return {"error": "Authorization required"}, httpResponse.NO_TOKEN
     return {}, httpResponse.OK_GET
 
 
 @app.route("/person", methods=["POST"])
 def post_person():
     if not_authorised(request.headers):
-        return {}, httpResponse.NO_TOKEN
+        return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
     return {}, httpResponse.OK_POST
 
 
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
     if not_authorised(request.headers):
-        return {}, httpResponse.NO_TOKEN
+        return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
     return {}, httpResponse.OK_DELETE
 
 
