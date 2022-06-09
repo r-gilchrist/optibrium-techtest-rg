@@ -7,6 +7,12 @@ BASE_URL = "http://127.0.0.1:5000/"
 HEADER = {"x-api-key": "skeleton-key"}
 
 
+def post(name, authenticate=True):
+    headers = HEADER if authenticate else {}
+    response = requests.post(BASE_URL + "person", headers=headers, json = {"name": name})
+    return response
+
+
 class GetPeopleTests(unittest.TestCase):
 
     def setUp(self):
@@ -16,14 +22,14 @@ class GetPeopleTests(unittest.TestCase):
         ensure_tables_are_created()
 
     def test_success_one(self):
-        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
+        post("Ryan")
         response = requests.get(BASE_URL + "person", headers=HEADER)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"1": {"name": "Ryan"}})
 
     def test_success_two(self):
-        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
-        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Sarah"})
+        post("Ryan")
+        post("Sarah")
         response = requests.get(BASE_URL + "person", headers=HEADER)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"1": {"name": "Ryan"}, "2": {"name": "Sarah"}})
@@ -43,23 +49,23 @@ class PostPersonTests(unittest.TestCase):
         ensure_tables_are_created()
 
     def test_success(self):
-        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
+        response = post("Ryan")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {"id": 1, "name": "Ryan"})
 
     def test_notoken(self):
-        response = requests.post(BASE_URL + "person", json={"name": "Ryan"})
+        response = post("Ryan", authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
     def test_alphanumeric(self):
-        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan!"})
+        response = response = post("Ryan!!!!!!!!!!!!")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
     def test_duplicate(self):
-        for n in range(2):
-            response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
+        post("Ryan")
+        response = post("Ryan")
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json(), {"error": "Name exists"})
 
@@ -71,7 +77,7 @@ class DeletePersonTests(unittest.TestCase):
         if os.path.exists(db := "database.db"):
             os.remove(db)
         ensure_tables_are_created()
-        requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
+        post("Ryan")
 
     def test_success(self):
         response = requests.delete(BASE_URL + "person/1", headers=HEADER)
