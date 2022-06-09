@@ -108,9 +108,10 @@ def delete_person(id):
 @app.route("/status", methods=["GET"])
 def get_status():
 
-    # Check if database is offline
+    # Check if database exists
     if database.get_db_status() is False:
         return {"error": "Database is not active"}, httpResponse.INACTIVE_DB
+
     return {"msg": "OK"}, httpResponse.OK_STATUS
 
 

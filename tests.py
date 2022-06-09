@@ -121,6 +121,7 @@ class GetStatusTests(unittest.TestCase):
     '''Tests for expected status endpoint functionality'''
 
     def setUp(self):
+        '''Ensures database always exists at start of each test'''
         ensure_tables_are_created()
 
     def test_success(self):
@@ -139,6 +140,7 @@ class DeleteDatabaseTests(unittest.TestCase):
     '''Tests for expected functionality when database is deleted from disk'''
 
     def setUp(self):
+        '''Deletes database but does not recreate it'''
         if os.path.exists(db := "database.db"):
             os.remove(db)
 
