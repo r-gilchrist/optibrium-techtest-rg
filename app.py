@@ -39,7 +39,12 @@ def get_people():
     if not_authorised(request.headers):
         return {"error": "Authorization required"}, httpResponse.NO_TOKEN
 
-    return {}, httpResponse.OK_GET
+    # Retrieve existing names and ids
+    names = database.get_names()
+    ids = database.get_ids()
+    content = {id: {"name": name} for (id, name) in zip(ids, names)}
+
+    return content, httpResponse.OK_GET
 
 
 @app.route("/person", methods=["POST"])
