@@ -7,9 +7,24 @@ BASE_URL = "http://127.0.0.1:5000/"
 HEADER = {"x-api-key": "skeleton-key"}
 
 
-def post(name, authenticate=True):
+def get(endpoint="person", authenticate=True):
+    '''Sends GET request'''
+    headers = HEADER if authenticate else {}
+    response = requests.get(BASE_URL + endpoint, headers=headers)
+    return response
+
+
+def post(name="Ryan", authenticate=True):
+    '''Sends POST request'''
     headers = HEADER if authenticate else {}
     response = requests.post(BASE_URL + "person", headers=headers, json={"name": name})
+    return response
+
+
+def delete(id=1, authenticate=True):
+    '''Sends DELETE request'''
+    headers = HEADER if authenticate else {}
+    response = requests.delete(BASE_URL + f"person/{id}", headers=headers)
     return response
 
 
@@ -22,20 +37,20 @@ class GetPeopleTests(unittest.TestCase):
         ensure_tables_are_created()
 
     def test_success_one(self):
-        post("Ryan")
-        response = requests.get(BASE_URL + "person", headers=HEADER)
+        post()
+        response = get()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"1": {"name": "Ryan"}})
 
     def test_success_two(self):
-        post("Ryan")
-        post("Sarah")
-        response = requests.get(BASE_URL + "person", headers=HEADER)
+        post()
+        post(name="Sarah")
+        response = get()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"1": {"name": "Ryan"}, "2": {"name": "Sarah"}})
 
     def test_notoken(self):
-        response = requests.get(BASE_URL + "person")
+        response = get(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Authorization required"})
 
@@ -49,23 +64,23 @@ class PostPersonTests(unittest.TestCase):
         ensure_tables_are_created()
 
     def test_success(self):
-        response = post("Ryan")
+        response = post()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {"id": 1, "name": "Ryan"})
 
     def test_notoken(self):
-        response = post("Ryan", authenticate=False)
+        response = post(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
     def test_alphanumeric(self):
-        response = response = post("Ryan!!!!!!!!!!!!")
+        response = post("Ryan!!!")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
     def test_duplicate(self):
-        post("Ryan")
-        response = post("Ryan")
+        post()
+        response = post()
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json(), {"error": "Name exists"})
 
@@ -77,19 +92,19 @@ class DeletePersonTests(unittest.TestCase):
         if os.path.exists(db := "database.db"):
             os.remove(db)
         ensure_tables_are_created()
-        post("Ryan")
+        post()
 
     def test_success(self):
-        response = requests.delete(BASE_URL + "person/1", headers=HEADER)
+        response = delete()
         self.assertEqual(response.status_code, 204)
 
     def test_notoken(self):
-        response = requests.delete(BASE_URL + "person/1")
+        response = delete(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
     def test_notfound(self):
-        response = requests.delete(BASE_URL + "person/100", headers=HEADER)
+        response = delete(id=100)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"error": "Not Found"})
 
@@ -100,12 +115,12 @@ class GetStatusTests(unittest.TestCase):
         ensure_tables_are_created()
 
     def test_success(self):
-        response = requests.get(BASE_URL + "status")
+        response = get(endpoint='status', authenticate=False)  # No authentication required
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"msg": "OK"})
 
     def test_offline(self):
         os.remove("database.db")
-        response = requests.get(BASE_URL + "status")
+        response = get(endpoint='status', authenticate=False)  # No authentication required
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"error": "Database is not active"})
