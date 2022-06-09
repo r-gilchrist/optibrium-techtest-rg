@@ -29,6 +29,7 @@ def delete(id=1, authenticate=True):
 
 
 class GetPeopleTests(unittest.TestCase):
+    '''Tests for expected GET functionality'''
 
     def setUp(self):
         '''Reset the table for each test'''
@@ -56,6 +57,7 @@ class GetPeopleTests(unittest.TestCase):
 
 
 class PostPersonTests(unittest.TestCase):
+    '''Tests for expected POST functionality'''
 
     def setUp(self):
         '''Reset the table for each test'''
@@ -91,6 +93,7 @@ class PostPersonTests(unittest.TestCase):
 
 
 class DeletePersonTests(unittest.TestCase):
+    '''Tests for expected DELETE functionality'''
 
     def setUp(self):
         '''Reset the table for each test'''
@@ -115,6 +118,7 @@ class DeletePersonTests(unittest.TestCase):
 
 
 class GetStatusTests(unittest.TestCase):
+    '''Tests for expected status endpoint functionality'''
 
     def setUp(self):
         ensure_tables_are_created()
@@ -129,3 +133,30 @@ class GetStatusTests(unittest.TestCase):
         response = get(endpoint='status', authenticate=False)  # No authentication required
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"error": "Database is not active"})
+
+
+class DeleteDatabaseTests(unittest.TestCase):
+    '''Tests for expected functionality when database is deleted from disk'''
+
+    def setUp(self):
+        if os.path.exists(db := "database.db"):
+            os.remove(db)
+
+    def test_get(self):
+        response = get()
+        self.assertEqual(response.status_code, 200)
+
+    def test_post(self):
+        response = post()
+        self.assertEqual(response.status_code, 201)
+
+    def test_delete(self):
+        post()
+        response = delete()
+        self.assertEqual(response.status_code, 204)
+
+    def post_and_get(self):
+        post()
+        response = get()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"id": 1, "name": "Ryan"})
