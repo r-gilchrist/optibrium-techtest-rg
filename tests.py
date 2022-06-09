@@ -9,7 +9,7 @@ HEADER = {"x-api-key": "skeleton-key"}
 
 def post(name, authenticate=True):
     headers = HEADER if authenticate else {}
-    response = requests.post(BASE_URL + "person", headers=headers, json = {"name": name})
+    response = requests.post(BASE_URL + "person", headers=headers, json={"name": name})
     return response
 
 
