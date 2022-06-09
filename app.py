@@ -10,12 +10,12 @@ def get_people():
 
 @app.route("/person", methods=["POST"])
 def post_person():
-    return {}
+    return {}, 201
 
 
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
-    return {}
+    return {}, 204
 
 
 @app.route("/status", methods=["GET"])
