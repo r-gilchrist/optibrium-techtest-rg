@@ -9,9 +9,24 @@ HEADER = {"x-api-key": "skeleton-key"}
 
 class GetPeopleTests(unittest.TestCase):
 
-    def test_success(self):
+    def setUp(self):
+        '''Reset the table for each test'''
+        if os.path.exists(db := "database.db"):
+            os.remove(db)
+        ensure_tables_are_created()
+
+    def test_success_one(self):
+        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
         response = requests.get(BASE_URL + "person", headers=HEADER)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"1": {"name": "Ryan"}})
+
+    def test_success_two(self):
+        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
+        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Sarah"})
+        response = requests.get(BASE_URL + "person", headers=HEADER)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"1": {"name": "Ryan"}, "2": {"name": "Sarah"}})
 
     def test_notoken(self):
         response = requests.get(BASE_URL + "person")
