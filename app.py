@@ -30,6 +30,11 @@ def get_people():
 def post_person():
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
+
+    data = request.get_json()
+
+    if not data["name"].isalpha():
+        return {"error": "Names must be alphanumeric"}, 400
     return {}, httpResponse.OK_POST
 
 
