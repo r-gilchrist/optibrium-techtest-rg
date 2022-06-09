@@ -20,13 +20,18 @@ class GetPeopleTests(unittest.TestCase):
 class PostPersonTests(unittest.TestCase):
 
     def test_success(self):
-        response = requests.post(BASE_URL + "person", headers=HEADER , json={"name": "Ryan"})
+        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan"})
         self.assertEqual(response.status_code, 201)
 
     def test_notoken(self):
         response = requests.post(BASE_URL + "person", json={"name": "Ryan"})
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
+
+    def test_alphanumeric(self):
+        response = requests.post(BASE_URL + "person", headers=HEADER, json={"name": "Ryan!"})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
 
 class DeletePersonTests(unittest.TestCase):
