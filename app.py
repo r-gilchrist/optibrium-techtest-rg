@@ -20,6 +20,9 @@ class httpResponse:
     # Alphanumeric
     NOT_ALPHA = 400
 
+    # Duplicate names
+    DUPLICATE = 409
+
 
 def not_authorised(headers):
     '''Returns True if no x-api-token has been provided'''
@@ -46,12 +49,9 @@ def post_person():
     # Get name
     name = request.get_json()["name"]
 
-    # Get existing names
-    existing_data = database.get_people()
-    if len(existing_data) > 0:
-        _, names = zip(*existing_data)
-        if name in names:
-            return {"error": "Name exists"}, 409
+    # Check if name already exists
+    if name in database.get_names():
+        return {"error": "Name exists"}, httpResponse.DUPLICATE
 
     # Check user data is alphanumeric
     if not name.isalpha():
