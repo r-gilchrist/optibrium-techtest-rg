@@ -14,6 +14,9 @@ class httpResponse:
     # No x-api-token
     NO_TOKEN = 401
 
+    # Alphanumeric
+    NOT_ALPHA = 400
+
 
 def not_authorised(headers):
     return headers.get("x-api-key") is None
@@ -30,11 +33,9 @@ def get_people():
 def post_person():
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
-
     data = request.get_json()
-
     if not data["name"].isalpha():
-        return {"error": "Names must be alphanumeric"}, 400
+        return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
     return {}, httpResponse.OK_POST
 
 
