@@ -1,7 +1,7 @@
 # Optibrium Technical Test - A Collection of People
 
 - **Solution by**: *Ryan Gilchrist*
-- **Date**: *9th June, 2020*
+- **Date**: *9th June, 2022*
 - [Endpoint specification](https://github.com/optibrium/python_developer_tech_test/blob/main/People.md)
  
 ### Requirements
