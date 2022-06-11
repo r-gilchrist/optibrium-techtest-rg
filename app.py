@@ -20,6 +20,7 @@ class httpResponse:
     ID_NOT_FOUND = 404
     DUPLICATE_NAME = 409
     NO_NAME_KEY = 410
+    NOT_A_STRING = 411
     INACTIVE_DATABASE = 500
 
 
@@ -57,6 +58,9 @@ def post_person():
 
     if (name := content["name"]) in database.get_names():
         return {"error": "Name exists"}, httpResponse.DUPLICATE_NAME
+
+    if type(name) is not str:
+        return {"error": "'name' must be a string"}, httpResponse.NOT_A_STRING
 
     if not name.isalnum():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHANUMERIC
