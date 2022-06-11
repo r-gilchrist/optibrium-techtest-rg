@@ -14,23 +14,13 @@ class httpResponse:
     OK_DELETE = 204
     OK_STATUS = 200
 
-    # No x-api-token
-    NO_TOKEN = 401
-
-    # Alphanumeric
-    NOT_ALPHA = 400
-
-    # Duplicate names
-    DUPLICATE = 409
-
-    # Id not found
+    # Failure codes
+    NOT_ALPHANUMERIC = 400
+    NO_X_API_TOKEN = 401
     ID_NOT_FOUND = 404
-
-    # Inactive database
-    INACTIVE_DB = 500
-
-    # No name in json
-    NO_NAME = 410
+    DUPLICATE_NAME = 409
+    NO_NAME_KEY = 410
+    INACTIVE_DATABASE = 500
 
 
 def not_authorised(headers):
@@ -46,7 +36,7 @@ def get_people():
 
     # Check authorisation
     if not_authorised(request.headers):
-        return {"error": "Authorization required"}, httpResponse.NO_TOKEN
+        return {"error": "Authorization required"}, httpResponse.NO_X_API_TOKEN
 
     # Retrieve existing names and ids
     names = database.get_names()
@@ -64,23 +54,23 @@ def post_person():
 
     # Check authorisation
     if not_authorised(request.headers):
-        return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
+        return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
 
     # Check if user has specified name in json
     content = request.get_json()
     if "name" not in content.keys():
-        return {"error": "'name' is not specified"}, httpResponse.NO_NAME
+        return {"error": "'name' is not specified"}, httpResponse.NO_NAME_KEY
 
     # Get name
     name = content["name"]
 
     # Check if name already exists
     if name in database.get_names():
-        return {"error": "Name exists"}, httpResponse.DUPLICATE
+        return {"error": "Name exists"}, httpResponse.DUPLICATE_NAME
 
     # Check user data is alphanumeric
     if not name.isalpha():
-        return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
+        return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHANUMERIC
 
     # Add person to database
     id = database.add_person(name)
@@ -96,7 +86,7 @@ def delete_person(id):
 
     # Check authorisation
     if not_authorised(request.headers):
-        return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
+        return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
 
     # Check if id exists
     if id not in database.get_ids():
@@ -110,7 +100,7 @@ def get_status():
 
     # Check if database exists
     if database.get_db_status() is False:
-        return {"error": "Database is not active"}, httpResponse.INACTIVE_DB
+        return {"error": "Database is not active"}, httpResponse.INACTIVE_DATABASE
 
     return {"msg": "OK"}, httpResponse.OK_STATUS
 
