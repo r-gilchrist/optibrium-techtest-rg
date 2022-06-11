@@ -1,44 +1,34 @@
-# Optibrium Technical Test - A Collection of People
+# Optibrium Technical Test - Updates Following the Initial Code Submission
 
-- **Solution by**: *Ryan Gilchrist*
-- **Date**: *9th June, 2022*
+- **Updates by**: *Ryan Gilchrist*
+- **Date**: *11th June, 2022*
 - [Endpoint specification](https://github.com/optibrium/python_developer_tech_test/blob/main/People.md)
  
-### Requirements
+### Introduction
 
-The API was developed using `Python v3.9.13`. Additional requirements include `Flask` and `requests`. Install these with `pip install -r requirements.txt` in a fresh virtual environment.
+Following the submission of my initial solution, I decided to revisit the code a few days later. I uncovered a few things and additions that I thought would be worth changing, as potential talking points.
 
-### Files
+### Docker
 
-- `app.py`: Flask application. `python app.py` will start the server on https://127.0.0.1:5000/.
-- `tests.py`: Unit tests for the application. `python -m unittest tests.py` will run these tests. The server must be running for the tests to work.
-- `database.py`: Modified version of the [original file](https://github.com/optibrium/python_developer_tech_test/blob/main/database.py) from Optibrium.
-- `requirements.txt`: Environment requirements. Install using `pip`.
+I learned a little bit about Docker after submitting, and thought it would be useful to include a Dockerfile for easier deployment on computers that aren't mine!
 
-### Development timeline
+This also means that you can build and run the docker image, and then exectute `python -m unittest tests.py` without manually starting the server.
 
-1. 'Skeleton draft' of API routes.
-2. Implement successful response codes.
-3. Implement failed response codes that don't require logic that involves interacting with the SQL database.
-4. Link with SQL database and pass appropriate json responses.
-5. Implement remaining failed response codes.
-6. Define the 'server inactive' criteria (defined in this project as to whether the file exists) and implement relevant responses.
+### Additional tests
 
-### Additional feature included
+I realised I hadn't tested any edge cases for POSTing names. So I added not-string, numbers only, numbers/letters combination, and zero-length tests in the POST test class. This uncovered a bug in the code; I was using `isalpha` instead of `isalnum`, so names with numbers weren't able to be submitted.
 
-When trying to `POST` without a `name` key, the API will return `status_code 410` with response of `{"error": "'name' is not specified"}`. This is not part of the original specification, but adds robustness to the server.
+I also added exit code 411 for where the name wasn't a string in the first place!
 
-### Approach to testing
+### Security
 
-I used Test-Driven-Development (TDD) and commited frequently. The benefits of this were:
-- I changed the implementation a few times (e.g., by creating a few new functions and classes). TDD discourages implementation-specific tests, which provides more freedom to refactor.
-- I am by no means an expert on using Flask or sqlite3. TDD encouraged me to think about the problem in small steps, allowing me to develop a solution using methods I am less familiar with.
-- Every line of `app.py` is accounted for with a test of some description (as I only wrote code required to pass something in `tests.py`), and so the code hasn't been over-engineered.
+Authentication tests have been moved to the first step of each function in `app.py` where appropriate. I would assume this is slightly better practice from a security standpoint!
 
-The API was also tested using curl and by sending a range of requests in Python.
+### Minor edits
 
-### What could be done better?
+1. Functions, objects etc. have been made more descriptive where I felt improvements could be made.
+2. Pretty much all of my comments could be removed and the user can still understand the code. On the one hand this makes the code more concise, but on the other hand I don't think the comments were doing anything particularly harmful, weren't overly long and so could have been useful to someone. I've left this updated version with minimal commentary to compare styles with the original.
+3. Since I'm now using Docker to specify the version of Python, I added a Walrus operator `:=` to make part of the code slightly more concise.
+4. One of the tests was broken (incorrectly-specified test - the code was OK). So I fixed the test
 
-- Better criteria for inactive database.
-- More tests?
-- Think about how the API would scale up to many users.
+
