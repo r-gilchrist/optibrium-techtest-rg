@@ -31,10 +31,10 @@ def not_authorised(headers):
 @app.route("/person", methods=["GET"])
 def get_people():
 
-    database.ensure_tables_are_created()
-
     if not_authorised(request.headers):
         return {"error": "Authorization required"}, httpResponse.NO_X_API_TOKEN
+
+    database.ensure_tables_are_created()
 
     names = database.get_names()
     ids = database.get_ids()
@@ -46,10 +46,10 @@ def get_people():
 @app.route("/person", methods=["POST"])
 def post_person():
 
-    database.ensure_tables_are_created()
-
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
+
+    database.ensure_tables_are_created()
 
     content = request.get_json()
     if "name" not in content.keys():
@@ -70,10 +70,10 @@ def post_person():
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
 
-    database.ensure_tables_are_created()
-
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
+
+    database.ensure_tables_are_created()
 
     if id not in database.get_ids():
         return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND
