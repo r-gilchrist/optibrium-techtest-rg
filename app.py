@@ -58,7 +58,7 @@ def post_person():
     if (name := content["name"]) in database.get_names():
         return {"error": "Name exists"}, httpResponse.DUPLICATE_NAME
 
-    if not name.isalpha():
+    if not name.isalnum():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHANUMERIC
 
     id = database.add_person(name)  # Saves person to disk
