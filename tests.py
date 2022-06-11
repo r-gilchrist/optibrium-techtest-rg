@@ -97,6 +97,11 @@ class PostPersonTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
+    def test_post_fail_name_is_not_string(self):
+        response = post(name=1)
+        self.assertEqual(response.status_code, 411)
+        self.assertEqual(response.json(), {"error": "'name' must be a string"})
+
     def test_post_fail_duplicate_name(self):
         post()
         response = post()
