@@ -72,27 +72,27 @@ class PostPersonTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {"id": 1, "name": "Ryan"})
 
-    def test_get_fail_authentication(self):
+    def test_post_fail_authentication(self):
         response = post(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
-    def test_get_fail_not_alphanumeric(self):
+    def test_post_fail_not_alphanumeric(self):
         response = post(name="Ryan!!!")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
-    def test_get_success_numbers_only(self):
-        response = post("1234")
+    def test_post_success_numbers_only(self):
+        response = post(name="1234")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {"id": 1, "name": "1234"})
 
-    def test_get_success_numbers_and_letters(self):
-        response = post("Ryan1234")
+    def test_post_success_numbers_and_letters(self):
+        response = post(name="Ryan1234")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {"id": 1, "name": "Ryan1234"})
 
-    def test_get_fail_duplicate_name(self):
+    def test_post_fail_duplicate_name(self):
         post()
         response = post()
         self.assertEqual(response.status_code, 409)
