@@ -31,14 +31,11 @@ def not_authorised(headers):
 @app.route("/person", methods=["GET"])
 def get_people():
 
-    # Reinforce table creation
     database.ensure_tables_are_created()
 
-    # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Authorization required"}, httpResponse.NO_X_API_TOKEN
 
-    # Retrieve existing names and ids
     names = database.get_names()
     ids = database.get_ids()
     content = {id: {"name": name} for (id, name) in zip(ids, names)}
@@ -49,31 +46,23 @@ def get_people():
 @app.route("/person", methods=["POST"])
 def post_person():
 
-    # Reinforce table creation
     database.ensure_tables_are_created()
 
-    # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
 
-    # Check if user has specified name in json
     content = request.get_json()
     if "name" not in content.keys():
         return {"error": "'name' is not specified"}, httpResponse.NO_NAME_KEY
 
-    # Get name
     name = content["name"]
-
-    # Check if name already exists
     if name in database.get_names():
         return {"error": "Name exists"}, httpResponse.DUPLICATE_NAME
 
-    # Check user data is alphanumeric
     if not name.isalpha():
         return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHANUMERIC
 
-    # Add person to database
-    id = database.add_person(name)
+    id = database.add_person(name)  # Saves person to disk
 
     return {"id": id, "name": name}, httpResponse.OK_POST
 
@@ -81,14 +70,11 @@ def post_person():
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
 
-    # Reinforce table creation
     database.ensure_tables_are_created()
 
-    # Check authorisation
     if not_authorised(request.headers):
         return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
 
-    # Check if id exists
     if id not in database.get_ids():
         return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND
 
@@ -98,7 +84,6 @@ def delete_person(id):
 @app.route("/status", methods=["GET"])
 def get_status():
 
-    # Check if database exists
     if database.get_db_status() is False:
         return {"error": "Database is not active"}, httpResponse.INACTIVE_DATABASE
 
