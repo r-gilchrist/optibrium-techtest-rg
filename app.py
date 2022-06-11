@@ -55,8 +55,7 @@ def post_person():
     if "name" not in content.keys():
         return {"error": "'name' is not specified"}, httpResponse.NO_NAME_KEY
 
-    name = content["name"]
-    if name in database.get_names():
+    if (name := content["name"]) in database.get_names():
         return {"error": "Name exists"}, httpResponse.DUPLICATE_NAME
 
     if not name.isalpha():
