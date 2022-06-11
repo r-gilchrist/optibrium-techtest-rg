@@ -20,6 +20,8 @@ I realised I hadn't tested any edge cases for POSTing names. So I added not-stri
 
 I also added exit code 411 for where the name wasn't a string in the first place!
 
+Finally, I realised the DELETE request wasn't actually removing a person from the database, and have fixed.
+
 ### Security
 
 Authentication tests have been moved to the first step of each function in `app.py` where appropriate. I would assume this is slightly better practice from a security standpoint!
