@@ -131,10 +131,17 @@ class DeletePersonTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
-    def test_get_fail_id_not_found(self):
+    def test_delete_fail_id_not_found(self):
         response = delete(id=100)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"error": "Not Found"})
+
+    def test_delete_correct_get_response(self):
+        post(name="Sarah")
+        delete(id=1)
+        response = get()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"2": {"name": "Sarah"}})
 
 
 class GetStatusTests(unittest.TestCase):

@@ -81,6 +81,8 @@ def delete_person(id):
     if id not in database.get_ids():
         return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND
 
+    database.delete_person(id)
+
     return {}, httpResponse.OK_DELETE
 
 
