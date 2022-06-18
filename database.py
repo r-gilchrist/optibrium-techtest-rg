@@ -23,22 +23,6 @@ def get_people():
     return result
 
 
-def get_names():
-    result = get_people()
-    if len(result) > 0:
-        _, names = zip(*result)
-        return names
-    return []
-
-
-def get_ids():
-    result = get_people()
-    if len(result) > 0:
-        ids, _ = zip(*result)
-        return ids
-    return []
-
-
 def add_person(name):
     con = sqlite3.connect(FILENAME)
     cur = con.cursor()

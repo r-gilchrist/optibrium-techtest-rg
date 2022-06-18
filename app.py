@@ -14,23 +14,14 @@ class httpResponse:
     OK_DELETE = 204
     OK_STATUS = 200
 
-    # No x-api-token
-    NO_TOKEN = 401
-
-    # Alphanumeric
-    NOT_ALPHA = 400
-
-    # Duplicate names
-    DUPLICATE = 409
-
-    # Id not found
+    # Failure codes
+    NOT_ALPHANUMERIC = 400
+    NO_X_API_TOKEN = 401
     ID_NOT_FOUND = 404
-
-    # Inactive database
-    INACTIVE_DB = 500
-
-    # No name in json
-    NO_NAME = 410
+    DUPLICATE_NAME = 409
+    NO_NAME_KEY = 410
+    NOT_A_STRING = 411
+    INACTIVE_DATABASE = 500
 
 
 def not_authorised(headers):
@@ -41,17 +32,17 @@ def not_authorised(headers):
 @app.route("/person", methods=["GET"])
 def get_people():
 
-    # Reinforce table creation
+    if not_authorised(request.headers):
+        return {"error": "Authorization required"}, httpResponse.NO_X_API_TOKEN
+
     database.ensure_tables_are_created()
 
-    # Check authorisation
-    if not_authorised(request.headers):
-        return {"error": "Authorization required"}, httpResponse.NO_TOKEN
+    people = database.get_people()
 
-    # Retrieve existing names and ids
-    names = database.get_names()
-    ids = database.get_ids()
-    content = {id: {"name": name} for (id, name) in zip(ids, names)}
+    if len(people) > 0:
+        content = {id: {"name": name} for (id, name) in zip(*people)}
+    else:
+        content = {}
 
     return content, httpResponse.OK_GET
 
@@ -59,31 +50,25 @@ def get_people():
 @app.route("/person", methods=["POST"])
 def post_person():
 
-    # Reinforce table creation
+    if not_authorised(request.headers):
+        return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
+
     database.ensure_tables_are_created()
 
-    # Check authorisation
-    if not_authorised(request.headers):
-        return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
-
-    # Check if user has specified name in json
     content = request.get_json()
     if "name" not in content.keys():
-        return {"error": "'name' is not specified"}, httpResponse.NO_NAME
+        return {"error": "'name' is not specified"}, httpResponse.NO_NAME_KEY
 
-    # Get name
-    name = content["name"]
+    if (name := content["name"]) in database.get_names():
+        return {"error": "Name exists"}, httpResponse.DUPLICATE_NAME
 
-    # Check if name already exists
-    if name in database.get_names():
-        return {"error": "Name exists"}, httpResponse.DUPLICATE
+    if type(name) is not str:
+        return {"error": "'name' must be a string"}, httpResponse.NOT_A_STRING
 
-    # Check user data is alphanumeric
-    if not name.isalpha():
-        return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHA
+    if not name.isalnum():
+        return {"error": "Names must be alphanumeric"}, httpResponse.NOT_ALPHANUMERIC
 
-    # Add person to database
-    id = database.add_person(name)
+    id = database.add_person(name)  # Saves person to disk
 
     return {"id": id, "name": name}, httpResponse.OK_POST
 
@@ -91,16 +76,13 @@ def post_person():
 @app.route("/person/<int:id>", methods=["DELETE"])
 def delete_person(id):
 
-    # Reinforce table creation
+    if not_authorised(request.headers):
+        return {"error": "Unauthorised"}, httpResponse.NO_X_API_TOKEN
+
     database.ensure_tables_are_created()
 
-    # Check authorisation
-    if not_authorised(request.headers):
-        return {"error": "Unauthorised"}, httpResponse.NO_TOKEN
-
-    # Check if id exists
-    if id not in database.get_ids():
-        return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND
+    if not database.delete_person(id):
+        return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND        
 
     return {}, httpResponse.OK_DELETE
 
@@ -108,9 +90,8 @@ def delete_person(id):
 @app.route("/status", methods=["GET"])
 def get_status():
 
-    # Check if database exists
     if database.get_db_status() is False:
-        return {"error": "Database is not active"}, httpResponse.INACTIVE_DB
+        return {"error": "Database is not active"}, httpResponse.INACTIVE_DATABASE
 
     return {"msg": "OK"}, httpResponse.OK_STATUS
 

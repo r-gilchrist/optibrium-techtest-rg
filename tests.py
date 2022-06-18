@@ -41,20 +41,20 @@ class GetPeopleTests(unittest.TestCase):
         delete_database()
         ensure_tables_are_created()
 
-    def test_success_one(self):
+    def test_get_success_one_person(self):
         post()
         response = get()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"1": {"name": "Ryan"}})
 
-    def test_success_two(self):
+    def test_get_success_two_people(self):
         post()
         post(name="Sarah")
         response = get()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"1": {"name": "Ryan"}, "2": {"name": "Sarah"}})
 
-    def test_notoken(self):
+    def test_get_fail_authenticate(self):
         response = get(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Authorization required"})
@@ -67,28 +67,48 @@ class PostPersonTests(unittest.TestCase):
         delete_database()
         ensure_tables_are_created()
 
-    def test_success(self):
+    def test_post_success(self):
         response = post()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {"id": 1, "name": "Ryan"})
 
-    def test_notoken(self):
+    def test_post_fail_authentication(self):
         response = post(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
-    def test_alphanumeric(self):
+    def test_post_fail_not_alphanumeric(self):
         response = post(name="Ryan!!!")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
 
-    def test_duplicate(self):
+    def test_post_success_numbers_only(self):
+        response = post(name="1234")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {"id": 1, "name": "1234"})
+
+    def test_post_success_numbers_and_letters(self):
+        response = post(name="Ryan1234")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), {"id": 1, "name": "Ryan1234"})
+
+    def test_post_fail_name_length_zero(self):
+        response = post(name="")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"error": "Names must be alphanumeric"})
+
+    def test_post_fail_name_is_not_string(self):
+        response = post(name=1)
+        self.assertEqual(response.status_code, 411)
+        self.assertEqual(response.json(), {"error": "'name' must be a string"})
+
+    def test_post_fail_duplicate_name(self):
         post()
         response = post()
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json(), {"error": "Name exists"})
 
-    def test_badjson(self):
+    def test_get_fail_no_name_parameter(self):
         response = requests.post(BASE_URL + "person", headers=HEADER, json={"bad_param": "Ryan"})
         self.assertEqual(response.status_code, 410)
         self.assertEqual(response.json(), {"error": "'name' is not specified"})
@@ -102,19 +122,26 @@ class DeletePersonTests(unittest.TestCase):
         ensure_tables_are_created()
         post()
 
-    def test_success(self):
+    def test_delete_success(self):
         response = delete()
         self.assertEqual(response.status_code, 204)
 
-    def test_notoken(self):
+    def test_delete_fail_authentication(self):
         response = delete(authenticate=False)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {"error": "Unauthorised"})
 
-    def test_notfound(self):
+    def test_delete_fail_id_not_found(self):
         response = delete(id=100)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"error": "Not Found"})
+
+    def test_delete_correct_get_response(self):
+        post(name="Sarah")
+        delete(id=1)
+        response = get()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"2": {"name": "Sarah"}})
 
 
 class GetStatusTests(unittest.TestCase):
@@ -123,12 +150,12 @@ class GetStatusTests(unittest.TestCase):
     def setUp(self):
         ensure_tables_are_created()
 
-    def test_success(self):
+    def test_get_status_success(self):
         response = get(endpoint='status', authenticate=False)  # No authentication required
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"msg": "OK"})
 
-    def test_offline(self):
+    def test_get_status_inactive(self):
         delete_database()
         response = get(endpoint='status', authenticate=False)  # No authentication required
         self.assertEqual(response.status_code, 500)
@@ -141,21 +168,21 @@ class DeleteDatabaseTests(unittest.TestCase):
     def setUp(self):
         delete_database()
 
-    def test_get(self):
+    def test_get_success_after_database_deletion(self):
         response = get()
         self.assertEqual(response.status_code, 200)
 
-    def test_post(self):
+    def test_post_success_after_database_deletion(self):
         response = post()
         self.assertEqual(response.status_code, 201)
 
-    def test_delete(self):
+    def test_delete_success_after_database_deletion(self):
         post()
         response = delete()
         self.assertEqual(response.status_code, 204)
 
-    def post_and_get(self):
+    def test_post_and_get_success_after_database_deletion(self):
         post()
         response = get()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"id": 1, "name": "Ryan"})
+        self.assertEqual(response.json(), {"1": {"name": "Ryan"}})
