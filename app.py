@@ -37,9 +37,12 @@ def get_people():
 
     database.ensure_tables_are_created()
 
-    names = database.get_names()
-    ids = database.get_ids()
-    content = {id: {"name": name} for (id, name) in zip(ids, names)}
+    people = database.get_people()
+
+    if len(people) > 0:
+        content = {id: {"name": name} for (id, name) in zip(*people)}
+    else:
+        content = {}
 
     return content, httpResponse.OK_GET
 
@@ -78,10 +81,8 @@ def delete_person(id):
 
     database.ensure_tables_are_created()
 
-    if id not in database.get_ids():
-        return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND
-
-    database.delete_person(id)
+    if not database.delete_person(id):
+        return {"error": "Not Found"}, httpResponse.ID_NOT_FOUND        
 
     return {}, httpResponse.OK_DELETE
 
